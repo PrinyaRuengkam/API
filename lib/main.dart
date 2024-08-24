@@ -10,103 +10,53 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tesla News',
+      title: 'Profile Layout',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: NewsPage(),
+      home: ProfilePage(),
     );
   }
 }
 
-class NewsPage extends StatefulWidget {
-  @override
-  _NewsPageState createState() => _NewsPageState();
-}
-
-class _NewsPageState extends State<NewsPage> {
-  List<dynamic> _news = [];
-  bool _isLoading = true;
-  String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchNews();
-  }
-
-  Future<void> _fetchNews() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
-
-    final String apiUrl = 'https://newsapi.org/v2/everything?q=tesla&from=2024-07-17&sortBy=publishedAt&apiKey=960d5acd91074df6babd52f7992b3231';
-
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _news = data['articles'];
-          _isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load news');
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Error fetching news: $e';
-      });
-    }
-  }
-
+class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tesla News'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _fetchNews,
-          ),
-        ],
+      appBar: AppBar(title: Text('Profile')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 60,
+              backgroundImage: NetworkImage('https://i.ibb.co/DrSp7td/20230116-124307.png'),
+            ),
+            SizedBox(height: 16),
+            ProfileInfo('นายปริญญา เรืองคำ', 24, FontWeight.bold),
+            ProfileInfo('เลขประจำตัว: 6512732105', 18),
+            ProfileInfo('สาขา: วิทยาการคอมพิวเตอร์', 18),
+          ],
+        ),
       ),
-      body: _buildBody(),
     );
   }
+}
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else if (_errorMessage.isNotEmpty) {
-      return Center(child: Text(_errorMessage));
-    } else if (_news.isEmpty) {
-      return Center(child: Text('No news available'));
-    } else {
-      return RefreshIndicator(
-        onRefresh: _fetchNews,
-        child: ListView.builder(
-          itemCount: _news.length,
-          itemBuilder: (context, index) {
-            final article = _news[index];
-            return Card(
-              margin: EdgeInsets.all(8),
-              child: ListTile(
-                title: Text(article['title'] ?? 'No title'),
-                subtitle: Text(article['description'] ?? 'No description'),
-                onTap: () {
-                  // TODO: Implement navigation to article detail page
-                },
-              ),
-            );
-          },
-        ),
-      );
-    }
+class ProfileInfo extends StatelessWidget {
+  final String text;
+  final double fontSize;
+  final FontWeight fontWeight;
+
+  const ProfileInfo(this.text, this.fontSize, [this.fontWeight = FontWeight.normal]);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+    );
   }
 }
